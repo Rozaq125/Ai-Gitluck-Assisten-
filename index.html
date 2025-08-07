@@ -1,3 +1,4 @@
+[]; return; } const stored = localStorage.getItem(`gitluck_chat_history_${state.currentUser.email}`); state.chatHistory = stored ? JSON.parse(stored) : []; }
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -11,6 +12,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
         :root {
@@ -57,6 +59,7 @@
         .theme-code .chat-bubble.assistant { background-color: #282C34; }
         .theme-code .mode-btn[data-mode="code"] { color: #8BE9FD; }
 
+        /* AI Art mode removed, but keeping a placeholder for theme styling */
         .theme-art { background-color: #2F2038; }
         .theme-art footer { background-color: #2F2038; border-color: #46344B; }
         .theme-art footer .bg-var--bg-light { background-color: #46344B; }
@@ -190,17 +193,24 @@
             <div id="chat-container" class="flex-1 p-4 md:p-6 overflow-y-auto scroll-custom"><div id="message-list" class="flex flex-col space-y-4"></div></div>
             <footer class="p-4 border-t flex-shrink-0">
                 <div class="max-w-4xl mx-auto">
-                    <div id="file-preview-container" class="hidden mb-2"><div class="relative inline-block"><img id="file-preview" src="" class="h-24 w-24 object-cover rounded-md border-2 border-var(--bg-light)"><button id="remove-file-btn" class="absolute -top-2 -right-2 bg-red-600 text-white rounded-full h-6 w-6 flex items-center justify-center text-xs font-bold">&times;</button></div></div>
-                    <div class="flex items-end bg-var--bg-light rounded-xl p-2">
+                    <div id="file-preview-container" class="hidden mb-2">
+                        <div class="relative inline-block">
+                            <img id="file-preview" src="" class="h-24 w-24 object-cover rounded-md border-2 border-var(--bg-light)">
+                            <button id="remove-file-btn" class="absolute -top-2 -right-2 bg-red-600 text-white rounded-full h-6 w-6 flex items-center justify-center text-xs font-bold">&times;</button>
+                        </div>
+                    </div>
+                    <div class="flex items-end bg-var(--bg-light) rounded-xl p-2">
                         <div id="mode-buttons-container" class="flex items-center flex-shrink-0">
+                            <!-- Tombol untuk Mode Chat dan Code, mode AI Art telah dihapus -->
                             <button id="mode-code-btn" data-mode="code" class="mode-btn p-2 text-var(--text-secondary) hover:text-white transition rounded-full"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></button>
-                            <button id="mode-art-btn" data-mode="art" class="mode-btn p-2 text-var(--text-secondary) hover:text-white transition rounded-full"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 13c.2-.2.2-.5 0-.7l-2.4-2.4c-.2-.2-.5-.2-.7 0l-1.5 1.5-3.2-3.2c-.3-.2-.5-.2-.7 0L2.8 16.8c0 .2.2.5.4.5l4.6.7.7 4.6c.2.2.5.2.5.4l8-8.1z"/></svg></button>
+                            <!-- Tombol untuk mode AI Art dihapus sesuai permintaan -->
                             <button id="mode-research-btn" data-mode="research" class="mode-btn p-2 text-var(--text-secondary) hover:text-white transition rounded-full"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg></button>
-                            <button id="camera-btn" class="p-2 text-var(--text-secondary) hover:text-white transition rounded-full disabled:text-gray-600 disabled:cursor-not-allowed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg></button>
-                            <button id="upload-btn" class="p-2 text-var(--text-secondary) hover:text-white transition rounded-full disabled:text-gray-600 disabled:cursor-not-allowed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-paperclip"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.59a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></button>
+                            <!-- Tombol kamera dan unggah file tetap ada untuk fitur Scan Math -->
+                            <button id="camera-btn" class="p-2 text-var(--text-secondary) hover:text-white transition rounded-full disabled:text-gray-600 disabled:cursor-not-allowed"><i class="fas fa-camera"></i></button>
+                            <button id="upload-btn" class="p-2 text-var(--text-secondary) hover:text-white transition rounded-full disabled:text-gray-600 disabled:cursor-not-allowed"><i class="fas fa-paperclip"></i></button>
                         </div>
                         <div id="prompt-input-wrapper" class="flex flex-1 items-center">
-                            <input type="file" id="file-input" class="hidden" accept="image/*,video/*">
+                            <input type="file" id="file-input" class="hidden" accept="image/*">
                             <input type="file" id="camera-input" class="hidden" accept="image/*" capture="camera">
                             <textarea id="prompt-input" rows="1" class="flex-1 min-w-0 bg-transparent text-white placeholder-var(--text-secondary) resize-none focus:outline-none mx-2 self-center" placeholder="Kirim pesan..."></textarea>
                             <button id="send-btn" class="bg-var(--accent) hover:bg-var(--accent-hover) text-white font-bold p-2 rounded-full transition disabled:bg-gray-500 disabled:cursor-not-allowed flex items-center justify-center w-10 h-10 self-end flex-shrink-0">
@@ -273,7 +283,7 @@
         let state = { currentUser: null, chatHistory: [], activeChatId: null, isLoading: false, attachedFile: { base64: null, mimeType: null, type: null }, inputMode: 'chat' };
        
         const API_KEY = "AIzaSyC_8t-asGWUaivAeFlFke0w5P8XZQ8HyCw";
-        const MODELS = { text: 'gemini-2.5-flash-preview-05-20', image: 'imagen-3.0-generate-002' };
+        const MODELS = { text: 'gemini-2.5-flash-preview-05-20' };
         const API_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/models/';
         const MAX_RETRIES = 5;
         const INITIAL_BACKOFF = 1000;
@@ -283,7 +293,7 @@
             app.closeDiscountModalBtn.addEventListener('click', startApplication);
             setupEventListeners();
             autoResizeTextarea();
-            renderFilePreview(); // Initial check to hide the preview
+            // Menghapus renderFilePreview() dari init untuk menghindari bug tampilan.
         }
 
         function startApplication() {
@@ -374,12 +384,14 @@
                 state.inputMode = mode;
             }
 
+            // AI Art mode is removed
+            if (state.inputMode === 'art') state.inputMode = 'chat';
+
             app.mainContent.classList.add(`theme-${state.inputMode}`);
 
             const placeholders = {
                 chat: 'Kirim pesan...',
                 code: 'Jelaskan kode yang Anda inginkan...',
-                art: 'Jelaskan gambar yang ingin dibuat...',
                 research: 'Apa yang ingin Anda riset di web?'
             };
             app.promptInput.placeholder = placeholders[state.inputMode];
@@ -482,6 +494,7 @@
                 const chatHistoryForAPI = activeChat.messages.map(msg => {
                     const parts = [];
                     if (msg.content) parts.push({ text: msg.content });
+                    // Handle image in chat history
                     if (msg.image) parts.push({ inlineData: { mimeType: 'image/jpeg', data: msg.image.split(',')[1] } });
                     return { role: msg.role === 'user' ? 'user' : 'model', parts };
                 });
@@ -493,27 +506,30 @@
                 if (fileToSend.base64) currentUserMessageParts.push({ inlineData: { mimeType: fileToSend.mimeType, data: fileToSend.base64.split(',')[1] } });
                 chatHistoryForAPI.push({ role: 'user', parts: currentUserMessageParts });
 
-
+                // Logic untuk fitur Scan Math: jika ada gambar, berikan prompt khusus
+                if (fileToSend.base64) {
+                    finalPrompt = "Lihat gambar ini, yang berisi soal matematika. Analisis soalnya, periksa apakah jawabannya benar atau salah. Berikan penjelasan rinci langkah demi langkah tentang cara menyelesaikannya. Tulis respons dalam Bahasa Indonesia yang mudah dipahami.";
+                    if (prompt) {
+                        finalPrompt = `(Instruksi tambahan dari pengguna: ${prompt})\n` + finalPrompt;
+                    }
+                    chatHistoryForAPI[chatHistoryForAPI.length - 1].parts[0].text = finalPrompt;
+                }
+               
                 switch(state.inputMode) {
-                    case 'art':
-                        response = await generateImage(prompt);
-                        break;
                     case 'code':
+                        // Menambahkan instruksi eksplisit agar hanya menghasilkan kode
                         finalPrompt = `Hasilkan hanya blok kode untuk permintaan berikut, tanpa penjelasan apa pun di luar blok kode. Permintaan: "${prompt}"`;
                         chatHistoryForAPI[chatHistoryForAPI.length - 1].parts[0].text = finalPrompt;
                         response = await generateTextResponse(chatHistoryForAPI);
                         break;
                     case 'research':
+                        // Menambahkan instruksi eksplisit untuk riset web
                         finalPrompt = `Lakukan riset web mendalam tentang topik berikut dan berikan jawaban yang komprehensif dan terstruktur dengan baik: "${prompt}"`;
                         chatHistoryForAPI[chatHistoryForAPI.length - 1].parts[0].text = finalPrompt;
                         response = await generateTextResponse(chatHistoryForAPI);
                         break;
-                    default: // 'chat'
-                        if (fileToSend.type === 'video') {
-                            response = await processVideoAndGenerateText(prompt, fileToSend);
-                        } else {
-                            response = await generateTextResponse(chatHistoryForAPI);
-                        }
+                    default: // 'chat' dan 'scan math'
+                        response = await generateTextResponse(chatHistoryForAPI);
                         break;
                 }
                
@@ -533,7 +549,7 @@
             } finally {
                 if (activeChat.title === 'Obrolan Baru' && activeChat.messages.length > 1) {
                     const firstUserMessage = activeChat.messages.find(m => m.role === 'user').content;
-                    activeChat.title = firstUserMessage.substring(0, 30) + (firstUserMessage.length > 30 ? '...' : '');
+                    activeChat.title = firstUserMessage ? (firstUserMessage.substring(0, 30) + (firstUserMessage.length > 30 ? '...' : '')) : 'Obrolan dengan Gambar';
                 }
                 saveChatHistory();
                 renderChatHistory();
@@ -549,32 +565,6 @@
             const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
             if (!text) throw new Error("Menerima respons kosong dari AI.");
             return { content: text };
-        }
-
-        async function processVideoAndGenerateText(prompt, videoFile) {
-            updateMessage(app.messageList.lastChild.id, "Menganalisis video, ini mungkin perlu beberapa saat...");
-            const frames = await extractFramesFromVideo(videoFile.base64, 5);
-            const apiUrl = `${API_BASE_URL}${MODELS.text}:generateContent?key=${API_KEY}`;
-            const parts = [{ text: `Analisis frame-frame dari video berikut dan jawab pertanyaan ini: "${prompt}"` }];
-            frames.forEach(frame => {
-                parts.push({ inlineData: { mimeType: 'image/jpeg', data: frame.split(',')[1] } });
-            });
-           
-            const payload = { contents: [{ role: "user", parts: parts }] };
-            const result = await makeApiCallWithRetry(apiUrl, payload);
-            const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
-            if (!text) throw new Error("Gagal menganalisis video.");
-            return { content: text };
-        }
-
-        async function generateImage(prompt) {
-            const apiUrl = `${API_BASE_URL}${MODELS.image}:predict?key=${API_KEY}`;
-            const payload = { instances: [{ prompt: prompt }], parameters: { sampleCount: 1 } };
-            const result = await makeApiCallWithRetry(apiUrl, payload);
-            const base64Data = result?.predictions?.[0]?.bytesBase64Encoded;
-            if (!base64Data) throw new Error("Gagal membuat gambar.");
-            const imageUrl = `data:image/png;base64,${base64Data}`;
-            return { content: `Berikut gambar untuk: "${prompt}"`, image: imageUrl };
         }
 
         // --- Utility Functions ---
@@ -605,7 +595,7 @@
             reader.onloadend = () => { 
                 state.attachedFile.base64 = reader.result; 
                 state.attachedFile.mimeType = file.type; 
-                state.attachedFile.type = file.type.startsWith('video') ? 'video' : 'image'; 
+                state.attachedFile.type = file.type.startsWith('image') ? 'image' : 'unknown'; // Menghapus dukungan video
                 app.filePreview.src = reader.result; 
                 app.filePreviewContainer.classList.remove('hidden'); 
             }; 
@@ -679,8 +669,7 @@
             autoResizeTextarea();
             setInputMode('chat'); // Reset to chat mode when replying
         }
-        function extractFramesFromVideo(videoSrc, frameCount) { return new Promise((resolve, reject) => { const video = document.createElement('video'); const canvas = document.createElement('canvas'); const context = canvas.getContext('2d'); const frames = []; video.preload = 'metadata'; video.src = videoSrc; video.muted = true; video.onloadedmetadata = () => { canvas.width = video.videoWidth; canvas.height = video.videoHeight; const duration = video.duration; if(duration === 0) { reject(new Error("Tidak dapat membaca durasi video.")); return; } const interval = duration / (frameCount + 1); let currentTime = interval; let framesExtracted = 0; video.onseeked = () => { if (framesExtracted < frameCount) { context.drawImage(video, 0, 0, canvas.width, canvas.height); frames.push(canvas.toDataURL('image/jpeg')); framesExtracted++; currentTime += interval; if (currentTime <= duration) { video.currentTime = currentTime; } else { resolve(frames); } } else { resolve(frames); } }; video.currentTime = currentTime; }; video.onerror = () => reject(new Error("Gagal memuat video.")); video.load(); }); }
-        function showPremiumModal() { const plans = [ { id: 'free', name: 'Gratis', price: 'Rp 0', desc: 'Untuk mencoba dasar-dasarnya.', features: ['✓ Model AI Standar', '✓ Riwayat Obrolan', '✓ Analisis Gambar', 'x Akses Prioritas', 'x Generasi Gambar'] }, { id: 'pro', name: 'Pro', price: 'Rp 75.000', popular: true, desc: 'Untuk pengguna mahir.', features: ['✓ Model AI Pro', '✓ Riwayat Obrolan', '✓ Analisis Gambar', '✓ Akses Prioritas', 'x Generasi Gambar'] }, { id: 'ultimate', name: 'Ultimate', price: 'Rp 150.000', desc: 'Buka semua potensi AI.', features: ['✓ Model AI Ultimate', '✓ Riwayat Obrolan', '✓ Analisis Gambar', '✓ Akses Prioritas', '✓ Generasi Gambar (AI Art)'] } ]; app.plansContainer.innerHTML = plans.map(plan => `<div class="border-2 ${plan.id === state.currentUser.premium ? 'border-var(--accent)' : 'border-var(--bg-light)'} p-6 rounded-lg text-center relative flex flex-col">${plan.popular ? `<span class="absolute top-0 -translate-y-1/2 bg-var(--accent) text-white text-xs font-bold px-3 py-1 rounded-full">Populer</span>` : ''}<h3 class="text-xl font-bold">${plan.name}</h3><p class="text-var(--text-secondary) my-4">${plan.desc}</p><p class="text-3xl font-bold mb-6">${plan.price}<span class="text-base font-normal text-var(--text-secondary)">${plan.id !== 'free' ? '/bulan' : ''}</span></p><ul class="text-left space-y-2 text-var(--text-primary) mb-6 flex-grow">${plan.features.map(f => `<li class="${f.startsWith('x') ? 'text-gray-500' : ''}">${f}</li>`).join('')}</ul><button data-plan="${plan.id}" class="upgrade-btn w-full font-bold py-2 px-4 rounded-lg transition ${plan.id === state.currentUser.premium ? 'bg-gray-600 cursor-not-allowed' : 'bg-var(--accent) hover:bg-var(--accent-hover)'}">${plan.id === state.currentUser.premium ? 'Paket Anda' : `Upgrade`}</button></div>`).join(''); app.plansContainer.querySelectorAll('.upgrade-btn').forEach(btn => { if (btn.dataset.plan !== state.currentUser.premium) btn.addEventListener('click', handleUpgradePlan); }); app.premiumModal.classList.remove('hidden'); }
+        function showPremiumModal() { const plans = [ { id: 'free', name: 'Gratis', price: 'Rp 0', desc: 'Untuk mencoba dasar-dasarnya.', features: ['✓ Model AI Standar', '✓ Riwayat Obrolan', '✓ Analisis Gambar', 'x Akses Prioritas', 'x Generasi Gambar'] }, { id: 'pro', name: 'Pro', price: 'Rp 75.000', popular: true, desc: 'Untuk pengguna mahir.', features: ['✓ Model AI Pro', '✓ Riwayat Obrolan', '✓ Analisis Gambar', '✓ Akses Prioritas', 'x Generasi Gambar'] }, { id: 'ultimate', name: 'Ultimate', price: 'Rp 150.000', desc: 'Buka semua potensi AI.', features: ['✓ Model AI Ultimate', '✓ Riwayat Obrolan', '✓ Analisis Gambar', '✓ Akses Prioritas', 'x Generasi Gambar'] } ]; app.plansContainer.innerHTML = plans.map(plan => `<div class="border-2 ${plan.id === state.currentUser.premium ? 'border-var(--accent)' : 'border-var(--bg-light)'} p-6 rounded-lg text-center relative flex flex-col">${plan.popular ? `<span class="absolute top-0 -translate-y-1/2 bg-var(--accent) text-white text-xs font-bold px-3 py-1 rounded-full">Populer</span>` : ''}<h3 class="text-xl font-bold">${plan.name}</h3><p class="text-var(--text-secondary) my-4">${plan.desc}</p><p class="text-3xl font-bold mb-6">${plan.price}<span class="text-base font-normal text-var(--text-secondary)">${plan.id !== 'free' ? '/bulan' : ''}</span></p><ul class="text-left space-y-2 text-var(--text-primary) mb-6 flex-grow">${plan.features.map(f => `<li class="${f.startsWith('x') ? 'text-gray-500' : ''}">${f}</li>`).join('')}</ul><button data-plan="${plan.id}" class="upgrade-btn w-full font-bold py-2 px-4 rounded-lg transition ${plan.id === state.currentUser.premium ? 'bg-gray-600 cursor-not-allowed' : 'bg-var(--accent) hover:bg-var(--accent-hover)'}">${plan.id === state.currentUser.premium ? 'Paket Anda' : `Upgrade`}</button></div>`).join(''); app.plansContainer.querySelectorAll('.upgrade-btn').forEach(btn => { if (btn.dataset.plan !== state.currentUser.premium) btn.addEventListener('click', handleUpgradePlan); }); app.premiumModal.classList.remove('hidden'); }
         function handleUpgradePlan(e) { const plan = e.target.dataset.plan; state.currentUser.premium = plan; let users = JSON.parse(localStorage.getItem('gitluck_users')) || []; const userIndex = users.findIndex(u => u.email === state.currentUser.email); if(userIndex !== -1) { users[userIndex].premium = plan; localStorage.setItem('gitluck_users', JSON.stringify(users)); sessionStorage.setItem('gitluck_session', JSON.stringify(state.currentUser)); renderUserProfile(); app.premiumModal.classList.add('hidden'); } }
         function showAdminPanel() { const users = JSON.parse(localStorage.getItem('gitluck_users')) || []; app.adminUserList.innerHTML = users.map(user => `<tr class="border-b border-var(--bg-light) hover:bg-var(--bg-light)"><td class="p-2">${user.email}</td><td class="p-2">${user.premium.toUpperCase()}</td><td class="p-2">${new Date(user.registeredAt).toLocaleDateString('id-ID')}</td></tr>`).join(''); app.adminPanelModal.classList.remove('hidden'); }
        
@@ -688,4 +677,3 @@
     </script>
 </body>
 </html>
-
