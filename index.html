@@ -37,7 +37,7 @@
         .typing-indicator span:nth-child(1) { animation-delay: -0.32s; } .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
         @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1.0); } }
        
-        .markdown-content pre { position: relative; }
+        .markdown-content pre { position: relative; overflow-x: auto; }
         .markdown-content pre code { font-family: 'Courier New', Courier, monospace; }
         .copy-code-btn { position: absolute; top: 0.5rem; right: 0.5rem; background-color: #4a5568; color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 0.375rem; font-size: 0.75rem; cursor: pointer; opacity: 0; transition: opacity 0.2s; }
         .markdown-content pre:hover .copy-code-btn { opacity: 1; }
@@ -88,7 +88,7 @@
             opacity: 1;
         }
 
-        /* Mobile-First UI enhancements */
+        /* Responsive UI for Mobile */
         @media (max-width: 768px) {
             #main-content {
                 display: flex;
@@ -99,7 +99,7 @@
             #chat-container {
                 flex-grow: 1;
                 overflow-y: auto;
-                padding-bottom: 6rem; /* Ensure space for the fixed footer */
+                padding-bottom: 6rem;
             }
 
             #main-content footer {
@@ -112,19 +112,17 @@
                 padding: 0.5rem;
                 box-shadow: 0 -2px 10px rgba(0,0,0,0.2);
             }
-
             #main-content footer .max-w-4xl {
                 margin: 0;
                 width: 100%;
             }
-
             #main-content footer .flex {
                 flex-wrap: wrap;
                 align-items: center;
                 gap: 0.5rem;
             }
             
-            #main-content footer .flex-shrink-0 {
+            #mode-buttons-container {
                 width: 100%;
                 order: 1;
                 display: flex;
@@ -133,19 +131,23 @@
                 padding: 0;
             }
 
-            #prompt-input {
+            #prompt-input-wrapper {
                 order: 2;
                 flex-grow: 1;
-                margin: 0.5rem;
+                width: calc(100% - 3.5rem); /* Adjust width for send button */
+            }
+
+            #prompt-input {
+                width: 100%;
                 min-height: 2.5rem;
                 max-height: 5rem;
             }
-            
+
             #send-btn {
                 order: 3;
                 width: 2.5rem;
                 height: 2.5rem;
-                align-self: center;
+                align-self: flex-end;
             }
 
             #file-preview-container {
@@ -190,20 +192,22 @@
                 <div class="max-w-4xl mx-auto">
                     <div id="file-preview-container" class="hidden mb-2"><div class="relative inline-block"><img id="file-preview" src="" class="h-24 w-24 object-cover rounded-md border-2 border-var(--bg-light)"><button id="remove-file-btn" class="absolute -top-2 -right-2 bg-red-600 text-white rounded-full h-6 w-6 flex items-center justify-center text-xs font-bold">&times;</button></div></div>
                     <div class="flex items-end bg-var--bg-light rounded-xl p-2">
-                        <div class="flex items-center flex-shrink-0">
+                        <div id="mode-buttons-container" class="flex items-center flex-shrink-0">
                             <button id="mode-code-btn" data-mode="code" class="mode-btn p-2 text-var(--text-secondary) hover:text-white transition rounded-full"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></button>
                             <button id="mode-art-btn" data-mode="art" class="mode-btn p-2 text-var(--text-secondary) hover:text-white transition rounded-full"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 13c.2-.2.2-.5 0-.7l-2.4-2.4c-.2-.2-.5-.2-.7 0l-1.5 1.5-3.2-3.2c-.3-.2-.5-.2-.7 0L2.8 16.8c0 .2.2.5.4.5l4.6.7.7 4.6c.2.2.5.2.5.4l8-8.1z"/></svg></button>
                             <button id="mode-research-btn" data-mode="research" class="mode-btn p-2 text-var(--text-secondary) hover:text-white transition rounded-full"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg></button>
                             <button id="camera-btn" class="p-2 text-var(--text-secondary) hover:text-white transition rounded-full disabled:text-gray-600 disabled:cursor-not-allowed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg></button>
                             <button id="upload-btn" class="p-2 text-var(--text-secondary) hover:text-white transition rounded-full disabled:text-gray-600 disabled:cursor-not-allowed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-paperclip"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.59a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></button>
                         </div>
-                        <input type="file" id="file-input" class="hidden" accept="image/*,video/*">
-                        <input type="file" id="camera-input" class="hidden" accept="image/*" capture="camera">
-                        <textarea id="prompt-input" rows="1" class="flex-1 min-w-0 bg-transparent text-white placeholder-var(--text-secondary) resize-none focus:outline-none mx-2 self-center" placeholder="Kirim pesan..."></textarea>
-                        <button id="send-btn" class="bg-var(--accent) hover:bg-var(--accent-hover) text-white font-bold p-2 rounded-full transition disabled:bg-gray-500 disabled:cursor-not-allowed flex items-center justify-center w-10 h-10 self-end flex-shrink-0">
-                            <span id="send-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></span>
-                            <div id="send-loader" class="button-loader hidden"></div>
-                        </button>
+                        <div id="prompt-input-wrapper" class="flex flex-1 items-center">
+                            <input type="file" id="file-input" class="hidden" accept="image/*,video/*">
+                            <input type="file" id="camera-input" class="hidden" accept="image/*" capture="camera">
+                            <textarea id="prompt-input" rows="1" class="flex-1 min-w-0 bg-transparent text-white placeholder-var(--text-secondary) resize-none focus:outline-none mx-2 self-center" placeholder="Kirim pesan..."></textarea>
+                            <button id="send-btn" class="bg-var(--accent) hover:bg-var(--accent-hover) text-white font-bold p-2 rounded-full transition disabled:bg-gray-500 disabled:cursor-not-allowed flex items-center justify-center w-10 h-10 self-end flex-shrink-0">
+                                <span id="send-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></span>
+                                <div id="send-loader" class="button-loader hidden"></div>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </footer>
@@ -279,6 +283,7 @@
             app.closeDiscountModalBtn.addEventListener('click', startApplication);
             setupEventListeners();
             autoResizeTextarea();
+            renderFilePreview(); // Initial check to hide the preview
         }
 
         function startApplication() {
@@ -586,8 +591,34 @@
         function autoResizeTextarea() { app.promptInput.addEventListener('input', () => { app.promptInput.style.height = 'auto'; app.promptInput.style.height = `${Math.min(app.promptInput.scrollHeight, 120)}px`; }); }
         function saveChatHistory() { if (state.currentUser && !state.currentUser.isGuest) localStorage.setItem(`gitluck_chat_history_${state.currentUser.email}`, JSON.stringify(state.chatHistory)); }
         function loadChatHistory() { if(state.currentUser.isGuest) { state.chatHistory = []; return; } const stored = localStorage.getItem(`gitluck_chat_history_${state.currentUser.email}`); state.chatHistory = stored ? JSON.parse(stored) : []; }
-        function removeAttachedFile() { state.attachedFile = { base64: null, mimeType: null, type: null }; app.filePreview.src = ''; app.filePreviewContainer.classList.add('hidden'); app.fileInput.value = ''; app.cameraInput.value = ''; }
-        function handleFileSelect(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onloadend = () => { state.attachedFile.base64 = reader.result; state.attachedFile.mimeType = file.type; state.attachedFile.type = file.type.startsWith('video') ? 'video' : 'image'; app.filePreview.src = reader.result; app.filePreviewContainer.classList.remove('hidden'); }; reader.readAsDataURL(file); }
+        function removeAttachedFile() { 
+            state.attachedFile = { base64: null, mimeType: null, type: null }; 
+            app.filePreview.src = ''; 
+            app.filePreviewContainer.classList.add('hidden'); 
+            app.fileInput.value = ''; 
+            app.cameraInput.value = '';
+        }
+        function handleFileSelect(event) { 
+            const file = event.target.files[0]; 
+            if (!file) return; 
+            const reader = new FileReader(); 
+            reader.onloadend = () => { 
+                state.attachedFile.base64 = reader.result; 
+                state.attachedFile.mimeType = file.type; 
+                state.attachedFile.type = file.type.startsWith('video') ? 'video' : 'image'; 
+                app.filePreview.src = reader.result; 
+                app.filePreviewContainer.classList.remove('hidden'); 
+            }; 
+            reader.readAsDataURL(file); 
+        }
+        function renderFilePreview() {
+            if (state.attachedFile.base64) {
+                app.filePreview.src = state.attachedFile.base64;
+                app.filePreviewContainer.classList.remove('hidden');
+            } else {
+                app.filePreviewContainer.classList.add('hidden');
+            }
+        }
         function setLoading(isLoading, view = 'chat') { state.isLoading = isLoading; if(view === 'chat') { app.sendBtn.disabled = isLoading; app.sendIcon.classList.toggle('hidden', isLoading); app.sendLoader.classList.toggle('hidden', !isLoading); } else { /* AI Art view has its own loader */ } }
         async function makeApiCallWithRetry(url, payload) {
             let delay = INITIAL_BACKOFF;
@@ -600,9 +631,9 @@
                     });
                     if (!response.ok) {
                         const errorData = await response.json().catch(() => ({}));
-                        if (response.status === 429) { // Too Many Requests
+                        if (response.status === 429) { 
                             await new Promise(resolve => setTimeout(resolve, delay));
-                            delay *= 2; // Exponential backoff
+                            delay *= 2; 
                             continue;
                         }
                         throw new Error(errorData?.error?.message || `HTTP error! Status: ${response.status}`);
@@ -615,7 +646,14 @@
                 }
             }
         }
-        function createNewChat() { const newChat = { id: Date.now().toString(), title: 'Obrolan Baru', messages: [] }; state.chatHistory.push(newChat); state.activeChatId = newChat.id; saveChatHistory(); renderApp(); appendMessage(Date.now(), 'assistant', 'Halo! Saya Gitluck AI. Ada yang bisa saya bantu?'); }
+        function createNewChat() { 
+            const newChat = { id: Date.now().toString(), title: 'Obrolan Baru', messages: [] }; 
+            state.chatHistory.push(newChat); 
+            state.activeChatId = newChat.id; 
+            saveChatHistory(); 
+            renderApp(); 
+            appendMessage(Date.now(), 'assistant', 'Halo! Saya Gitluck AI. Ada yang bisa saya bantu?'); 
+        }
         function toggleAuthForms(showRegister) { app.loginForm.classList.toggle('hidden', showRegister); app.registerForm.classList.toggle('hidden', !showRegister); app.loginError.textContent = ''; app.registerError.textContent = ''; }
         function renderChatHistory() { app.guestHistoryMessage.classList.toggle('hidden', !state.currentUser.isGuest); app.chatHistoryList.innerHTML = ''; if(state.currentUser.isGuest) return; const sortedHistory = [...state.chatHistory].sort((a, b) => b.id - a.id); sortedHistory.forEach(chat => { const li = document.createElement('li'); li.className = `p-2 rounded-lg cursor-pointer hover:bg-var(--bg-light) transition truncate ${chat.id === state.activeChatId ? 'bg-var(--bg-light)' : ''}`; li.textContent = chat.title; li.dataset.id = chat.id; li.addEventListener('click', () => { state.activeChatId = chat.id; saveChatHistory(); renderActiveChat(); renderChatHistory(); if (window.innerWidth < 768) toggleSidebar(); }); app.chatHistoryList.appendChild(li); }); }
         function renderActiveChat() { const chat = state.chatHistory.find(c => c.id === state.activeChatId); app.messageList.innerHTML = ''; if (chat) { chat.messages.forEach(msg => appendMessage(msg.id, msg.role, msg.content, msg.image)); } else if (state.chatHistory.length > 0) { state.activeChatId = state.chatHistory.sort((a, b) => b.id - a.id)[0].id; renderActiveChat(); } }
@@ -632,15 +670,14 @@
                 });
             } else if (event.target.classList.contains('reply-button')) {
                 const content = event.target.closest('.p-3').querySelector('.markdown-content').innerText;
-                app.promptInput.value = `"${content}"\n\n`;
-                app.promptInput.focus();
-                autoResizeTextarea();
+                handleReply(content);
             }
         }
         function handleReply(content) {
             app.promptInput.value = `"${content}"\n\n`;
             app.promptInput.focus();
             autoResizeTextarea();
+            setInputMode('chat'); // Reset to chat mode when replying
         }
         function extractFramesFromVideo(videoSrc, frameCount) { return new Promise((resolve, reject) => { const video = document.createElement('video'); const canvas = document.createElement('canvas'); const context = canvas.getContext('2d'); const frames = []; video.preload = 'metadata'; video.src = videoSrc; video.muted = true; video.onloadedmetadata = () => { canvas.width = video.videoWidth; canvas.height = video.videoHeight; const duration = video.duration; if(duration === 0) { reject(new Error("Tidak dapat membaca durasi video.")); return; } const interval = duration / (frameCount + 1); let currentTime = interval; let framesExtracted = 0; video.onseeked = () => { if (framesExtracted < frameCount) { context.drawImage(video, 0, 0, canvas.width, canvas.height); frames.push(canvas.toDataURL('image/jpeg')); framesExtracted++; currentTime += interval; if (currentTime <= duration) { video.currentTime = currentTime; } else { resolve(frames); } } else { resolve(frames); } }; video.currentTime = currentTime; }; video.onerror = () => reject(new Error("Gagal memuat video.")); video.load(); }); }
         function showPremiumModal() { const plans = [ { id: 'free', name: 'Gratis', price: 'Rp 0', desc: 'Untuk mencoba dasar-dasarnya.', features: ['✓ Model AI Standar', '✓ Riwayat Obrolan', '✓ Analisis Gambar', 'x Akses Prioritas', 'x Generasi Gambar'] }, { id: 'pro', name: 'Pro', price: 'Rp 75.000', popular: true, desc: 'Untuk pengguna mahir.', features: ['✓ Model AI Pro', '✓ Riwayat Obrolan', '✓ Analisis Gambar', '✓ Akses Prioritas', 'x Generasi Gambar'] }, { id: 'ultimate', name: 'Ultimate', price: 'Rp 150.000', desc: 'Buka semua potensi AI.', features: ['✓ Model AI Ultimate', '✓ Riwayat Obrolan', '✓ Analisis Gambar', '✓ Akses Prioritas', '✓ Generasi Gambar (AI Art)'] } ]; app.plansContainer.innerHTML = plans.map(plan => `<div class="border-2 ${plan.id === state.currentUser.premium ? 'border-var(--accent)' : 'border-var(--bg-light)'} p-6 rounded-lg text-center relative flex flex-col">${plan.popular ? `<span class="absolute top-0 -translate-y-1/2 bg-var(--accent) text-white text-xs font-bold px-3 py-1 rounded-full">Populer</span>` : ''}<h3 class="text-xl font-bold">${plan.name}</h3><p class="text-var(--text-secondary) my-4">${plan.desc}</p><p class="text-3xl font-bold mb-6">${plan.price}<span class="text-base font-normal text-var(--text-secondary)">${plan.id !== 'free' ? '/bulan' : ''}</span></p><ul class="text-left space-y-2 text-var(--text-primary) mb-6 flex-grow">${plan.features.map(f => `<li class="${f.startsWith('x') ? 'text-gray-500' : ''}">${f}</li>`).join('')}</ul><button data-plan="${plan.id}" class="upgrade-btn w-full font-bold py-2 px-4 rounded-lg transition ${plan.id === state.currentUser.premium ? 'bg-gray-600 cursor-not-allowed' : 'bg-var(--accent) hover:bg-var(--accent-hover)'}">${plan.id === state.currentUser.premium ? 'Paket Anda' : `Upgrade`}</button></div>`).join(''); app.plansContainer.querySelectorAll('.upgrade-btn').forEach(btn => { if (btn.dataset.plan !== state.currentUser.premium) btn.addEventListener('click', handleUpgradePlan); }); app.premiumModal.classList.remove('hidden'); }
