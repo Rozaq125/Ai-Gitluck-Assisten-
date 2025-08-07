@@ -88,19 +88,72 @@
             opacity: 1;
         }
 
-        /* Responsive UI for Mobile */
+        /* Mobile-First UI enhancements */
         @media (max-width: 768px) {
+            #main-content {
+                display: flex;
+                flex-direction: column;
+                height: 100vh;
+            }
+
+            #chat-container {
+                flex-grow: 1;
+                overflow-y: auto;
+                padding-bottom: 6rem; /* Ensure space for the fixed footer */
+            }
+
             #main-content footer {
-                padding: 1rem 0.5rem;
-            }
-            #main-content footer .max-w-4xl {
-                padding: 0 0.5rem;
-            }
-            .mode-btn, #upload-btn, #camera-btn {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                width: 100%;
+                z-index: 10;
                 padding: 0.5rem;
+                box-shadow: 0 -2px 10px rgba(0,0,0,0.2);
             }
+
+            #main-content footer .max-w-4xl {
+                margin: 0;
+                width: 100%;
+            }
+
+            #main-content footer .flex {
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 0.5rem;
+            }
+            
+            #main-content footer .flex-shrink-0 {
+                width: 100%;
+                order: 1;
+                display: flex;
+                justify-content: space-around;
+                background-color: transparent;
+                padding: 0;
+            }
+
             #prompt-input {
-                font-size: 1rem;
+                order: 2;
+                flex-grow: 1;
+                margin: 0.5rem;
+                min-height: 2.5rem;
+                max-height: 5rem;
+            }
+            
+            #send-btn {
+                order: 3;
+                width: 2.5rem;
+                height: 2.5rem;
+                align-self: center;
+            }
+
+            #file-preview-container {
+                order: 0;
+                width: 100%;
+                display: flex;
+                justify-content: center;
+                margin-bottom: 0.5rem;
             }
         }
     </style>
@@ -215,7 +268,7 @@
 
         let state = { currentUser: null, chatHistory: [], activeChatId: null, isLoading: false, attachedFile: { base64: null, mimeType: null, type: null }, inputMode: 'chat' };
        
-        const API_KEY = "AIzaSyC3a8uyTl7IcsbkzEdGA58fFJcEtIRyCnw";
+        const API_KEY = "AIzaSyC_8t-asGWUaivAeFlFke0w5P8XZQ8HyCw";
         const MODELS = { text: 'gemini-2.5-flash-preview-05-20', image: 'imagen-3.0-generate-002' };
         const API_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/models/';
         const MAX_RETRIES = 5;
