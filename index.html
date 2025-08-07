@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gitluck AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <style>
+        :root {
+            --bg-dark: #111827; --bg-medium: #1F2937; --bg-light: #374151;
+            --text-primary: #F9FAFB; --text-secondary: #9CA3AF;
+            --accent: #6366F1; --accent-hover: #4F46E5;
+        }
+        html { -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-medium); color: var(--text-primary); }
+        .scroll-custom::-webkit-scrollbar { width: 6px; }
+        .scroll-custom::-webkit-scrollbar-track { background: transparent; }
+        .scroll-custom::-webkit-scrollbar-thumb { background-color: var(--bg-light); border-radius: 20px; }
+        
+        #sidebar { transition: transform 0.3s ease-in-out; }
+        .sidebar-hidden { transform: translateX(-100%); }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeIn 0.3s ease-out forwards; }
+
+        .button-loader { border: 2px solid rgba(255,255,255,0.3); border-top: 2px solid white; border-radius: 50%; width: 18px; height: 18px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .typing-indicator span { height: 8px; width: 8px; margin: 0 2px; background-color: var(--text-secondary); border-radius: 50%; display: inline-block; animation: bounce 1.4s infinite ease-in-out both; }
+        .typing-indicator span:nth-child(1) { animation-delay: -0.32s; } .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1.0); } }
+        
+        .markdown-content pre { position: relative; }
+        .markdown-content pre code { font-family: 'Courier New', Courier, monospace; }
+        .code-header { display: flex; justify-content: flex-end; gap: 0.5rem; position: absolute; top: 0.5rem; right: 0.5rem; opacity: 0; transition: opacity 0.2s; }
+        .markdown-content pre:hover .code-header { opacity: 1; }
+        .code-btn { background-color: #4a5568; color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 0.375rem; font-size: 0.75rem; cursor: pointer; }
+        .markdown-content p { margin-bottom: 0.5rem; word-break: break-word; }
+        .markdown-content ul, .markdown-content ol { margin-left: 1.5rem; margin-bottom: 0.5rem; }
+        .markdown-content li { margin-bottom: 0.25rem; }
+    </style>
+</head>
+<body class="overflow-hidden h-screen">
+
+    <!-- Main Application Wrapper -->
+    <div id="app-wrapper" class="h-screen w-screen flex relative hidden">
+        
+        <aside id="sidebar" class="bg-var(--bg-dark) text-white w-72 flex-shrink-0 flex flex-col p-4 absolute md:relative z-20 h-full md:transform-none sidebar-hidden">
+            <div class="flex items-center gap-2 mb-4">
+                <svg class="h-8 w-8 text-var(--accent)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+                <h1 class="text-xl font-bold">Gitluck AI</h1>
+            </div>
+            
+            <div id="chat-history-section" class="flex-grow overflow-y-auto scroll-custom pr-2 -mr-2">
+                <button id="new-chat-btn" class="w-full bg-var(--accent) hover:bg-var(--accent-hover) text-white font-semibold py-2 px-4 rounded-lg transition mb-4">Obrolan Baru</button>
+                <h2 class="text-sm font-semibold text-var(--text-secondary) mb-2">Riwayat</h2>
+                <ul id="chat-history-list" class="space-y-1"></ul>
+                 <p id="guest-history-message" class="text-xs text-center text-var(--text-secondary) p-4 hidden">Login untuk menyimpan riwayat obrolan.</p>
+            </div>
+
+            <div id="user-profile" class="border-t border-var(--bg-light) pt-4 mt-4"></div>
+        </aside>
+
+        <main class="flex-1 flex flex-col h-screen bg-var(--bg-medium)">
+            <header class="md:hidden flex items-center justify-between p-4 bg-var(--bg-dark) border-b border-var(--bg-light) flex-shrink-0">
+                 <button id="menu-toggle-btn"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" /></svg></button>
+                 <h1 class="text-lg font-bold">Gitluck AI</h1>
+                 <div class="w-6"></div>
+            </header>
+            
+            <!-- NEW Mode Switcher -->
+            <div class="p-4 border-b border-var(--bg-light) flex-shrink-0">
+                <div class="flex items-center bg-var(--bg-dark) rounded-lg p-1 max-w-md mx-auto">
+                    <button data-mode="chat" class="mode-btn flex-1 py-1.5 text-sm font-semibold rounded-md">Obrolan</button>
+                    <button data-mode="code" class="mode-btn flex-1 py-1.5 text-sm font-semibold rounded-md">AI Code</button>
+                    <button data-mode="art" class="mode-btn flex-1 py-1.5 text-sm font-semibold rounded-md">AI Art</button>
+                </div>
+            </div>
+
+            <div id="chat-container" class="flex-1 p-4 md:p-6 overflow-y-auto scroll-custom"><div id="message-list" class="flex flex-col space-y-4"></div></div>
+            
+            <footer class="p-4 bg-var(--bg-medium) border-t border-var(--bg-light) flex-shrink-0">
+                <div class="max-w-4xl mx-auto">
+                    <div id="file-preview-container" class="hidden mb-2"><div class="relative inline-block"><img id="file-preview" src="" class="h-24 w-24 object-cover rounded-md border-2 border-var(--bg-light)"><button id="remove-file-btn" class="absolute -top-2 -right-2 bg-red-600 text-white rounded-full h-6 w-6 flex items-center justify-center text-xs font-bold">&times;</button></div></div>
+                    <div class="flex items-end bg-var(--bg-light) rounded-xl p-2">
+                        <button id="upload-btn" class="p-2 text-var(--text-secondary) hover:text-white transition rounded-full disabled:text-gray-600 disabled:cursor-not-allowed flex-shrink-0"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-paperclip"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.59a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></button>
+                        <input type="file" id="file-input" class="hidden" accept="image/*,video/*">
+                        <textarea id="prompt-input" rows="1" class="flex-1 min-w-0 bg-transparent text-white placeholder-var(--text-secondary) resize-none focus:outline-none mx-2 self-center" placeholder="Kirim pesan..."></textarea>
+                        <button id="send-btn" class="bg-var(--accent) hover:bg-var(--accent-hover) text-white font-bold p-2 rounded-full transition disabled:bg-gray-500 disabled:cursor-not-allowed flex items-center justify-center w-10 h-10 self-end flex-shrink-0">
+                            <span id="send-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></span>
+                            <div id="send-loader" class="button-loader hidden"></div>
+                        </button>
+                    </div>
+                </div>
+            </footer>
+        </main>
+    </div>
+    
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-10 hidden md:hidden"></div>
+
+    <div id="auth-modal" class="fixed inset-0 bg-gray-900 bg-opacity-80 flex items-center justify-center z-50 p-4 hidden">
+        <div class="bg-var(--bg-medium) p-8 rounded-2xl shadow-lg w-full max-w-sm text-center">
+            <div id="login-form">
+                <h2 class="text-2xl font-bold mb-4">Selamat Datang</h2><p id="login-error" class="text-sm mb-4 h-5"></p>
+                <input type="email" id="login-email" class="w-full bg-gray-200 text-gray-900 placeholder-gray-500 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-var(--accent) mb-4" placeholder="Email">
+                <input type="password" id="login-password" class="w-full bg-gray-200 text-gray-900 placeholder-gray-500 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-var(--accent)" placeholder="Password">
+                <button id="login-btn" class="w-full bg-var(--accent) hover:bg-var(--accent-hover) text-white font-bold py-3 px-4 rounded-lg mt-6 transition">Masuk</button>
+                <p class="text-sm text-var(--text-secondary) mt-4">Belum punya akun? <button id="show-register-form" class="text-var(--accent) font-semibold">Daftar</button></p>
+            </div>
+            <div id="register-form" class="hidden">
+                <h2 class="text-2xl font-bold mb-4">Daftar Akun Baru</h2><p id="register-error" class="text-red-400 text-sm mb-4 h-5"></p>
+                <input type="email" id="register-email" class="w-full bg-gray-200 text-gray-900 placeholder-gray-500 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-var(--accent) mb-4" placeholder="Email">
+                <input type="password" id="register-password" class="w-full bg-gray-200 text-gray-900 placeholder-gray-500 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-var(--accent)" placeholder="Password">
+                <button id="register-btn" class="w-full bg-var(--accent) hover:bg-var(--accent-hover) text-white font-bold py-3 px-4 rounded-lg mt-6 transition">Daftar</button>
+                <p class="text-sm text-var(--text-secondary) mt-4">Sudah punya akun? <button id="show-login-form" class="text-var(--accent) font-semibold">Login</button></p>
+            </div>
+            <div class="relative flex py-5 items-center"><div class="flex-grow border-t border-gray-600"></div><span class="flex-shrink mx-4 text-gray-400">atau</span><div class="flex-grow border-t border-gray-600"></div></div>
+            <button id="guest-login-btn" class="w-full bg-var(--bg-light) hover:bg-gray-500 text-white font-bold py-3 px-4 rounded-lg transition">Lanjutkan sebagai Tamu</button>
+        </div>
+    </div>
+    
+    <div id="preview-modal" class="fixed inset-0 bg-gray-900 bg-opacity-80 flex items-center justify-center z-50 p-4 hidden fade-in">
+        <div class="bg-var(--bg-dark) rounded-lg shadow-lg w-full max-w-4xl h-[80vh] flex flex-col">
+            <div class="flex justify-between items-center p-4 border-b border-var(--bg-light)">
+                <h3 class="font-semibold">Live Preview</h3>
+                <button id="close-preview-modal" class="text-2xl">&times;</button>
+            </div>
+            <iframe id="preview-iframe" class="w-full h-full border-0"></iframe>
+        </div>
+    </div>
+
+    <script type="module">
+        const getEl = (id) => document.getElementById(id);
+        const app = {
+            wrapper: getEl('app-wrapper'), sidebar: getEl('sidebar'), sidebarOverlay: getEl('sidebar-overlay'), menuToggleBtn: getEl('menu-toggle-btn'),
+            chatContainer: getEl('chat-container'), messageList: getEl('message-list'), promptInput: getEl('prompt-input'), sendBtn: getEl('send-btn'),
+            sendIcon: getEl('send-icon'), sendLoader: getEl('send-loader'), newChatBtn: getEl('new-chat-btn'), chatHistoryList: getEl('chat-history-list'),
+            chatHistorySection: getEl('chat-history-section'), guestHistoryMessage: getEl('guest-history-message'),
+            userProfile: getEl('user-profile'),
+            uploadBtn: getEl('upload-btn'), fileInput: getEl('file-input'), filePreviewContainer: getEl('file-preview-container'), filePreview: getEl('file-preview'), removeFileBtn: getEl('remove-file-btn'),
+            modeBtns: document.querySelectorAll('.mode-btn'),
+            authModal: getEl('auth-modal'), loginForm: getEl('login-form'), loginEmail: getEl('login-email'), loginPassword: getEl('login-password'), loginBtn: getEl('login-btn'), showRegisterForm: getEl('show-register-form'), loginError: getEl('login-error'),
+            registerForm: getEl('register-form'), registerEmail: getEl('register-email'), registerPassword: getEl('register-password'), registerBtn: getEl('register-btn'), showLoginForm: getEl('show-login-form'), registerError: getEl('register-error'),
+            guestLoginBtn: getEl('guest-login-btn'),
+            previewModal: getEl('preview-modal'), previewIframe: getEl('preview-iframe'), closePreviewModal: getEl('close-preview-modal'),
+        };
+
+        let state = { currentUser: null, chatHistory: [], activeChatId: null, isLoading: false, attachedFile: { base64: null, mimeType: null, type: null }, inputMode: 'chat' };
+        const API_KEY = "AIzaSyC3a8uyTl7IcsbkzEdGA58fFJcEtIRyCnw";
+        const MODELS = { text: 'gemini-2.5-flash-preview-05-20', image: 'imagen-3.0-generate-002' };
+        const API_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/models/';
+
+        function init() {
+            const sessionUser = sessionStorage.getItem('gitluck_session');
+            if (sessionUser) {
+                state.currentUser = JSON.parse(sessionUser);
+                loadChatHistory();
+                renderApp();
+            } else {
+                app.authModal.classList.remove('hidden');
+            }
+            setupEventListeners();
+            autoResizeTextarea();
+            setInputMode('chat'); // Set initial mode
+        }
+
+        function setupEventListeners() {
+            app.loginBtn.addEventListener('click', handleLogin);
+            app.registerBtn.addEventListener('click', handleRegister);
+            app.guestLoginBtn.addEventListener('click', handleGuestLogin);
+            app.showRegisterForm.addEventListener('click', () => toggleAuthForms(true));
+            app.showLoginForm.addEventListener('click', () => toggleAuthForms(false));
+            app.newChatBtn.addEventListener('click', createNewChat);
+            app.sendBtn.addEventListener('click', handleSendMessage);
+            app.promptInput.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendMessage(); } });
+            app.menuToggleBtn.addEventListener('click', toggleSidebar);
+            app.sidebarOverlay.addEventListener('click', toggleSidebar);
+            app.uploadBtn.addEventListener('click', () => app.fileInput.click());
+            app.fileInput.addEventListener('change', handleFileSelect);
+            app.removeFileBtn.addEventListener('click', removeAttachedFile);
+            app.modeBtns.forEach(btn => btn.addEventListener('click', () => setInputMode(btn.dataset.mode)));
+            app.messageList.addEventListener('click', handleMessageListClick);
+            app.closePreviewModal.addEventListener('click', () => app.previewModal.classList.add('hidden'));
+        }
+        
+        function renderApp() {
+            app.authModal.classList.add('hidden');
+            app.wrapper.classList.remove('hidden');
+            renderUserProfile();
+            renderChatHistory();
+            if (!state.activeChatId || state.chatHistory.length === 0) {
+                createNewChat(); return;
+            }
+            renderActiveChat();
+        }
+
+        function renderUserProfile() {
+            let profileHTML;
+            if (state.currentUser.isGuest) {
+                profileHTML = `
+                    <div class="text-center">
+                        <p class="text-sm text-var(--text-secondary) mb-2">Anda masuk sebagai Tamu.</p>
+                        <button id="login-from-guest-btn" class="w-full bg-var(--accent) hover:bg-var(--accent-hover) text-white font-semibold py-2 px-4 rounded-lg transition">Login atau Daftar</button>
+                    </div>`;
+            } else {
+                profileHTML = `
+                    <div class="flex items-center justify-between">
+                         <span class="font-semibold truncate">${state.currentUser.email}</span>
+                    </div>
+                    <button id="admin-panel-btn" class="${state.currentUser.isAdmin ? '' : 'hidden'} w-full text-center mt-3 text-sm text-yellow-400 hover:text-yellow-300">Panel Admin</button>
+                    <button id="logout-btn" class="w-full text-center mt-2 text-sm text-var(--text-secondary) hover:text-gray-300">Keluar</button>`;
+            }
+            app.userProfile.innerHTML = profileHTML;
+            if (state.currentUser.isGuest) {
+                getEl('login-from-guest-btn').addEventListener('click', handleLogout);
+            } else {
+                getEl('logout-btn').addEventListener('click', handleLogout);
+                if (state.currentUser.isAdmin) {
+                    // Placeholder for admin panel logic
+                }
+            }
+            app.uploadBtn.disabled = state.currentUser.isGuest;
+        }
+        
+        function setInputMode(mode) {
+            state.inputMode = mode;
+            const placeholders = {
+                chat: 'Kirim pesan...',
+                code: 'Jelaskan kode yang Anda inginkan...',
+                art: 'Jelaskan gambar yang ingin dibuat...',
+            };
+            app.promptInput.placeholder = placeholders[mode];
+            app.modeBtns.forEach(btn => {
+                const isActive = btn.dataset.mode === state.inputMode;
+                btn.classList.toggle('bg-var(--accent)', isActive);
+                btn.classList.toggle('text-white', isActive);
+            });
+        }
+
+        function appendMessage(id, role, content, imageBase64 = null) {
+            const messageWrapper = document.createElement('div');
+            messageWrapper.id = `msg-${id}`;
+            messageWrapper.className = `flex items-start gap-3 w-full fade-in`;
+            const isUser = role === 'user';
+            messageWrapper.classList.add(isUser ? 'justify-end' : 'justify-start');
+            
+            const bubble = document.createElement('div');
+            bubble.className = `p-3 rounded-xl max-w-[85%] ${isUser ? 'bg-var(--accent) text-white' : 'bg-var(--bg-light) text-var(--text-primary)'}`;
+
+            if (imageBase64) {
+                const img = document.createElement('img');
+                img.src = imageBase64;
+                img.className = 'rounded-lg mb-2 max-w-full h-auto md:max-w-xs';
+                bubble.appendChild(img);
+            }
+
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'markdown-content';
+            if (content) {
+                contentDiv.innerHTML = marked.parse(content);
+            } else if (role === 'assistant' && !content && !imageBase64) {
+                contentDiv.innerHTML = `<div class="typing-indicator"><span></span><span></span><span></span></div>`;
+            }
+            bubble.appendChild(contentDiv);
+            
+            messageWrapper.appendChild(bubble);
+            app.messageList.appendChild(messageWrapper);
+            
+            bubble.querySelectorAll('pre').forEach(pre => {
+                const code = pre.querySelector('code');
+                const lang = [...code.classList].find(c => c.startsWith('language-'));
+                const header = document.createElement('div');
+                header.className = 'code-header';
+                
+                if (lang === 'language-html' || lang === 'language-javascript' || lang === 'language-css') {
+                    const previewBtn = document.createElement('button');
+                    previewBtn.textContent = 'Preview';
+                    previewBtn.className = 'code-btn preview-code-btn';
+                    header.appendChild(previewBtn);
+                }
+
+                const copyBtn = document.createElement('button');
+                copyBtn.textContent = 'Salin';
+                copyBtn.className = 'code-btn copy-code-btn';
+                header.appendChild(copyBtn);
+                
+                pre.prepend(header);
+                hljs.highlightElement(code);
+            });
+            scrollToBottom();
+        }
+        
+        function updateMessage(id, content, imageBase64 = null) {
+            const messageWrapper = getEl(`msg-${id}`);
+            if (!messageWrapper) return;
+            const bubble = messageWrapper.querySelector('.p-3');
+            
+            let newHTML = '';
+            if (imageBase64) {
+                newHTML += `<img src="${imageBase64}" class="rounded-lg mb-2 max-w-full h-auto md:max-w-xs">`;
+            }
+            if (content) {
+                const contentDiv = document.createElement('div');
+                contentDiv.className = 'markdown-content';
+                contentDiv.innerHTML = marked.parse(content);
+                newHTML += contentDiv.outerHTML;
+            }
+            bubble.innerHTML = newHTML;
+
+            bubble.querySelectorAll('pre').forEach(pre => {
+                const code = pre.querySelector('code');
+                const lang = [...code.classList].find(c => c.startsWith('language-'));
+                const header = document.createElement('div');
+                header.className = 'code-header';
+                
+                if (lang === 'language-html' || lang === 'language-javascript' || lang === 'language-css') {
+                    const previewBtn = document.createElement('button');
+                    previewBtn.textContent = 'Preview';
+                    previewBtn.className = 'code-btn preview-code-btn';
+                    header.appendChild(previewBtn);
+                }
+
+                const copyBtn = document.createElement('button');
+                copyBtn.textContent = 'Salin';
+                copyBtn.className = 'code-btn copy-code-btn';
+                header.appendChild(copyBtn);
+                
+                pre.prepend(header);
+                hljs.highlightElement(code);
+            });
+        }
+
+        async function handleSendMessage() {
+            const prompt = app.promptInput.value.trim();
+            if ((!prompt && !state.attachedFile.base64) || state.isLoading) return;
+
+            const activeChat = state.chatHistory.find(c => c.id === state.activeChatId);
+            if (!activeChat) return;
+
+            setLoading(true);
+            const userMessage = { id: Date.now(), role: 'user', content: prompt, image: state.attachedFile.base64 };
+            activeChat.messages.push(userMessage);
+            appendMessage(userMessage.id, userMessage.role, userMessage.content, userMessage.image);
+            
+            const fileToSend = { ...state.attachedFile };
+            removeAttachedFile();
+            app.promptInput.value = '';
+            app.promptInput.style.height = 'auto';
+
+            const assistantMessageId = Date.now() + 1;
+            appendMessage(assistantMessageId, 'assistant', null);
+
+            try {
+                let response;
+                let finalPrompt = prompt;
+                
+                switch(state.inputMode) {
+                    case 'art':
+                        response = await generateImage(prompt);
+                        break;
+                    case 'code':
+                        finalPrompt = `Hasilkan hanya blok kode untuk permintaan berikut, tanpa penjelasan apa pun di luar blok kode. Permintaan: "${prompt}"`;
+                        response = await generateTextResponse(finalPrompt, fileToSend);
+                        break;
+                    case 'research':
+                        finalPrompt = `Lakukan riset web mendalam tentang topik berikut dan berikan jawaban yang komprehensif dan terstruktur dengan baik: "${prompt}"`;
+                        response = await generateTextResponse(finalPrompt, fileToSend);
+                        break;
+                    default: // 'chat'
+                        if (fileToSend.type === 'video') {
+                            response = await processVideoAndGenerateText(prompt, fileToSend);
+                        } else {
+                            response = await generateTextResponse(prompt, fileToSend);
+                        }
+                        break;
+                }
+                
+                const assistantMessage = { id: assistantMessageId, role: 'assistant', ...response };
+                const msgIndex = activeChat.messages.findIndex(m => m.id === assistantMessageId);
+                if(msgIndex > -1) activeChat.messages[msgIndex] = assistantMessage;
+                else activeChat.messages.push(assistantMessage);
+                
+                updateMessage(assistantMessage.id, assistantMessage.content, assistantMessage.image);
+
+            } catch (error) {
+                console.error("API Error:", error);
+                const errorMessage = error.message.includes("API key not valid") 
+                    ? "Terjadi kesalahan otentikasi. Kunci API tidak valid atau hilang. Silakan periksa konfigurasi Anda."
+                    : error.message;
+                updateMessage(assistantMessageId, `**Maaf, terjadi kesalahan:**\n${errorMessage}`);
+            } finally {
+                if (activeChat.title === 'Obrolan Baru' && activeChat.messages.length > 1) {
+                    const firstUserMessage = activeChat.messages.find(m => m.role === 'user').content;
+                    activeChat.title = firstUserMessage.substring(0, 30) + (firstUserMessage.length > 30 ? '...' : '');
+                }
+                saveChatHistory();
+                renderChatHistory();
+                setLoading(false);
+            }
+        }
+        
+        async function generateTextResponse(prompt, imageFile) {
+            const apiUrl = `${API_BASE_URL}${MODELS.text}:generateContent?key=${API_KEY}`;
+            const parts = [];
+            if (prompt) parts.push({ text: prompt });
+            if (imageFile.base64) parts.push({ inlineData: { mimeType: imageFile.mimeType, data: imageFile.base64.split(',')[1] } });
+            if (parts.length === 0) throw new Error("Tidak ada input.");
+
+            const payload = { contents: [{ role: "user", parts: parts }] };
+            const result = await makeApiCall(apiUrl, payload);
+            const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (!text) throw new Error("Menerima respons kosong dari AI.");
+            return { content: text };
+        }
+
+        async function processVideoAndGenerateText(prompt, videoFile) {
+            updateMessage(app.messageList.lastChild.id, "Menganalisis video, ini mungkin perlu beberapa saat...");
+            const frames = await extractFramesFromVideo(videoFile.base64, 5);
+            const apiUrl = `${API_BASE_URL}${MODELS.text}:generateContent?key=${API_KEY}`;
+            const parts = [{ text: `Analisis frame-frame dari video berikut dan jawab pertanyaan ini: "${prompt}"` }];
+            frames.forEach(frame => {
+                parts.push({ inlineData: { mimeType: 'image/jpeg', data: frame.split(',')[1] } });
+            });
+            
+            const payload = { contents: [{ role: "user", parts: parts }] };
+            const result = await makeApiCall(apiUrl, payload);
+            const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (!text) throw new Error("Gagal menganalisis video.");
+            return { content: text };
+        }
+
+        async function generateImage(prompt) {
+            const apiUrl = `${API_BASE_URL}${MODELS.image}:predict?key=${API_KEY}`;
+            const payload = { instances: [{ prompt: prompt }], parameters: { sampleCount: 1 } };
+            const result = await makeApiCall(apiUrl, payload);
+            const base64Data = result?.predictions?.[0]?.bytesBase64Encoded;
+            if (!base64Data) throw new Error("Gagal membuat gambar.");
+            const imageUrl = `data:image/png;base64,${base64Data}`;
+            return { content: `Berikut gambar untuk: "${prompt}"`, image: imageUrl };
+        }
+
+        // --- Utility Functions ---
+        function handleGuestLogin() { state.currentUser = { isGuest: true, premium: 'free' }; sessionStorage.setItem('gitluck_session', JSON.stringify(state.currentUser)); init(); }
+        function handleLogin() { const email = app.loginEmail.value.trim(); const password = app.loginPassword.value; app.loginError.textContent = ''; let users = JSON.parse(localStorage.getItem('gitluck_users')) || []; const adminUser = { email: 'gl@focusforcode.com', password: 'akuadminnih', premium: 'ultimate', isAdmin: true, registeredAt: new Date().toISOString() }; if (!users.find(u => u.email === adminUser.email)) { users.push(adminUser); localStorage.setItem('gitluck_users', JSON.stringify(users)); } const user = users.find(u => u.email === email && u.password === password); if (user) { state.currentUser = user; sessionStorage.setItem('gitluck_session', JSON.stringify(user)); init(); } else { app.loginError.textContent = 'Email atau password salah.'; app.loginError.className = 'text-red-400 text-sm mb-4 h-5'; } }
+        function handleRegister() { const email = app.registerEmail.value.trim(); const password = app.registerPassword.value; app.registerError.textContent = ''; if (!email || !password) { app.registerError.textContent = 'Email dan password tidak boleh kosong.'; return; } let users = JSON.parse(localStorage.getItem('gitluck_users')) || []; if (users.find(u => u.email === email)) { app.registerError.textContent = 'Email sudah terdaftar.'; return; } users.push({ email, password, premium: 'free', registeredAt: new Date().toISOString() }); localStorage.setItem('gitluck_users', JSON.stringify(users)); toggleAuthForms(false); app.loginError.textContent = 'Registrasi berhasil! Silakan login.'; app.loginError.className = 'text-green-400 text-sm mb-4 h-5'; app.registerEmail.value = ''; app.registerPassword.value = ''; }
+        function handleLogout() { sessionStorage.removeItem('gitluck_session'); location.reload(); }
+        function toggleSidebar() { app.sidebar.classList.toggle('sidebar-hidden'); app.sidebarOverlay.classList.toggle('hidden'); }
+        function scrollToBottom() { app.chatContainer.scrollTop = app.chatContainer.scrollHeight; }
+        function autoResizeTextarea() { app.promptInput.addEventListener('input', () => { app.promptInput.style.height = 'auto'; app.promptInput.style.height = `${Math.min(app.promptInput.scrollHeight, 120)}px`; }); }
+        function saveChatHistory() { if (state.currentUser && !state.currentUser.isGuest) localStorage.setItem(`gitluck_chat_history_${state.currentUser.email}`, JSON.stringify(state.chatHistory)); }
+        function loadChatHistory() { if(state.currentUser.isGuest) { state.chatHistory = []; return; } const stored = localStorage.getItem(`gitluck_chat_history_${state.currentUser.email}`); state.chatHistory = stored ? JSON.parse(stored) : []; }
+        function removeAttachedFile() { state.attachedFile = { base64: null, mimeType: null, type: null }; app.filePreview.src = ''; app.filePreviewContainer.classList.add('hidden'); app.fileInput.value = ''; }
+        function handleFileSelect(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onloadend = () => { state.attachedFile.base64 = reader.result; state.attachedFile.mimeType = file.type; state.attachedFile.type = file.type.startsWith('video') ? 'video' : 'image'; app.filePreview.src = reader.result; app.filePreviewContainer.classList.remove('hidden'); }; reader.readAsDataURL(file); }
+        function setLoading(isLoading) { state.isLoading = isLoading; app.sendBtn.disabled = isLoading; app.sendIcon.classList.toggle('hidden', isLoading); app.sendLoader.classList.toggle('hidden', !isLoading); }
+        async function makeApiCall(url, payload) { const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }); if (!response.ok) { const errorData = await response.json().catch(() => ({})); throw new Error(errorData?.error?.message || `HTTP error! Status: ${response.status}`); } return response.json(); }
+        function createNewChat() { const newChat = { id: Date.now().toString(), title: 'Obrolan Baru', messages: [] }; state.chatHistory.push(newChat); state.activeChatId = newChat.id; saveChatHistory(); renderApp(); appendMessage(Date.now(), 'assistant', 'Halo! Saya Gitluck AI. Ada yang bisa saya bantu?'); }
+        function toggleAuthForms(showRegister) { app.loginForm.classList.toggle('hidden', showRegister); app.registerForm.classList.toggle('hidden', !showRegister); app.loginError.textContent = ''; app.registerError.textContent = ''; }
+        function renderChatHistory() { app.guestHistoryMessage.classList.toggle('hidden', !state.currentUser.isGuest); app.chatHistoryList.innerHTML = ''; if(state.currentUser.isGuest) return; const sortedHistory = [...state.chatHistory].sort((a, b) => b.id - a.id); sortedHistory.forEach(chat => { const li = document.createElement('li'); li.className = `p-2 rounded-lg cursor-pointer hover:bg-var(--bg-light) transition truncate ${chat.id === state.activeChatId ? 'bg-var(--bg-light)' : ''}`; li.textContent = chat.title; li.dataset.id = chat.id; li.addEventListener('click', () => { state.activeChatId = chat.id; saveChatHistory(); renderActiveChat(); renderChatHistory(); if (window.innerWidth < 768) toggleSidebar(); }); app.chatHistoryList.appendChild(li); }); }
+        function renderActiveChat() { const chat = state.chatHistory.find(c => c.id === state.activeChatId); app.messageList.innerHTML = ''; if (chat) { chat.messages.forEach(msg => appendMessage(msg.id, msg.role, msg.content, msg.image)); } else if (state.chatHistory.length > 0) { state.activeChatId = state.chatHistory.sort((a, b) => b.id - a.id)[0].id; renderActiveChat(); } }
+        function handleMessageListClick(event) { const target = event.target; if (target.classList.contains('copy-code-btn')) { const pre = target.closest('pre'); const code = pre.querySelector('code').innerText; navigator.clipboard.writeText(code).then(() => { target.textContent = 'Disalin!'; setTimeout(() => { target.textContent = 'Salin'; }, 2000); }); } if (target.classList.contains('preview-code-btn')) { const pre = target.closest('pre'); const code = pre.querySelector('code').innerText; app.previewIframe.srcdoc = code; app.previewModal.classList.remove('hidden'); } }
+        function extractFramesFromVideo(videoSrc, frameCount) { return new Promise((resolve, reject) => { const video = document.createElement('video'); const canvas = document.createElement('canvas'); const context = canvas.getContext('2d'); const frames = []; video.preload = 'metadata'; video.src = videoSrc; video.muted = true; video.onloadedmetadata = () => { canvas.width = video.videoWidth; canvas.height = video.videoHeight; const duration = video.duration; if(duration === 0) { reject(new Error("Tidak dapat membaca durasi video.")); return; } const interval = duration / (frameCount + 1); let currentTime = interval; let framesExtracted = 0; video.onseeked = () => { if (framesExtracted < frameCount) { context.drawImage(video, 0, 0, canvas.width, canvas.height); frames.push(canvas.toDataURL('image/jpeg')); framesExtracted++; currentTime += interval; if (currentTime <= duration) { video.currentTime = currentTime; } else { resolve(frames); } } else { resolve(frames); } }; video.currentTime = currentTime; }; video.onerror = () => reject(new Error("Gagal memuat video.")); video.load(); }); }
+        
+        init();
+    </script>
+</body>
+</html>
+
