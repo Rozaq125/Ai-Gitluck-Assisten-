@@ -215,7 +215,7 @@
 
         let state = { currentUser: null, chatHistory: [], activeChatId: null, isLoading: false, attachedFile: { base64: null, mimeType: null, type: null }, inputMode: 'chat' };
        
-        const API_KEY = "";
+        const API_KEY = "AIzaSyC3a8uyTl7IcsbkzEdGA58fFJcEtIRyCnw";
         const MODELS = { text: 'gemini-2.5-flash-preview-05-20', image: 'imagen-3.0-generate-002' };
         const API_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/models/';
         const MAX_RETRIES = 5;
@@ -254,7 +254,7 @@
             app.uploadBtn.addEventListener('click', () => app.fileInput.click());
             app.cameraBtn.addEventListener('click', () => app.cameraInput.click());
             app.fileInput.addEventListener('change', handleFileSelect);
-            app.cameraInput.addEventListener('change', handleFileSelect); // Use the same handler for camera input
+            app.cameraInput.addEventListener('change', handleFileSelect);
             app.removeFileBtn.addEventListener('click', removeAttachedFile);
             app.modeBtns.forEach(btn => btn.addEventListener('click', () => setInputMode(btn.dataset.mode)));
             app.messageList.addEventListener('click', handleMessageListClick);
@@ -598,3 +598,4 @@
     </script>
 </body>
 </html>
+
